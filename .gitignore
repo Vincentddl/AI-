@@ -1,0 +1,11 @@
+# 数据库文件（运行时生成，不提交）
+data/*.db
+data/*.db-journal
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 临时文件
+temp/
+scripts/tmp_*

@@ -1,0 +1,71 @@
+# 数据源配置 - 跨市场投资 Agent
+# 依据 data-source-spec-v1.0.md 规范
+# 原则：P0 > P1 > P2 > P3，关键指标 Fail Closed
+
+version: "1.0"
+
+# ============ 中国 ============
+cn:
+  # 中证指数估值（P0: 官方 OSS Excel）
+  csindex_valuation:
+    primary: CSINDEX_OFFICIAL
+    base_url: "https://oss-ch.csindex.com.cn/static/html/csindex/public/uploads/file/autofile/indicator"
+    # 指数代码 -> 说明
+    indices:
+      "000300": "沪深300"
+      "000922": "中证红利"
+    # 注意：官方只提供最近 ~20 个交易日，历史必须每日落库积累
+    fail_policy: HARD_STOP
+    note: "只给近期20天，必须日频落库"
+
+  # 中国10年国债收益率（P0: ChinaBond 官方）
+  gov_10y:
+    primary: CHINABOND_OFFICIAL
+    base_url: "https://yield.chinabond.com.cn/cbweb-pbc-web/pbc/historyQuery"
+    params:
+      gjqx: "0"          # 0=全部期限
+      qxId: "hzsylqx"    # hzsylqx=中债国债收益率曲线
+      locale: "cn_ZH"
+    # 同源备用通道（底层仍是 ChinaBond，不能独立验证）
+    fallback_transport: AKSHARE_CHINABOND
+    # 独立备用（需 Tushare token）
+    fallback_independent: TUSHARE_YC_CB
+    fail_policy: HARD_STOP
+
+# ============ 美国（第二阶段，需 FRED API key） ============
+us:
+  sp500:
+    primary: FRED_SP500
+    series_id: "SP500"
+  nasdaq_composite:
+    primary: FRED_NASDAQCOM
+    series_id: "NASDAQCOM"
+  nasdaq100:
+    primary: FRED_NASDAQ100
+    series_id: "NASDAQ100"
+  gov_10y:
+    primary: US_TREASURY
+    fallback: FRED_DGS10
+    fail_policy: HARD_STOP
+
+# ============ 校验阈值（依据规范第25节） ============
+validation_thresholds:
+  index_close:
+    warning: 0.0005   # 0.05%
+    hard_stop: 0.0015  # 0.15%
+  pe:
+    warning: 0.01     # 1%
+    hard_stop: 0.02   # 2%
+  dividend_yield:
+    warning: 0.0005   # 0.05 pct
+    hard_stop: 0.001  # 0.10 pct
+  yield_10y:
+    warning: 0.03     # 3 bp
+    hard_stop: 0.05   # 5 bp
+  security_identity:
+    hard_stop: any_mismatch
+
+# ============ 单位规范 ============
+units:
+  rate: "percentage_points"   # 1.69 表示 1.69%，不存 0.0169
+  erp_formula: "100.0 / pe - yield_10y"
