@@ -32,21 +32,27 @@ cn:
     fallback_independent: TUSHARE_YC_CB
     fail_policy: HARD_STOP
 
-# ============ 美国（第二阶段，需 FRED API key） ============
+# ============ 美国（P3 源，国内平台无 token） ============
+# 用户决策：美国模块改用东方财富/腾讯，无需注册 FRED token
+# ⚠️ P3 定位：仅趋势监控/外盘扫描/交叉验证，不独立触发估值 BUY
 us:
   sp500:
-    primary: FRED_SP500
-    series_id: "SP500"
+    primary: TENCENT_QT          # usINX, 实时无token
+    internal_id: "US_SP500"
+    priority: "P3"
   nasdaq_composite:
-    primary: FRED_NASDAQCOM
-    series_id: "NASDAQCOM"
+    primary: TENCENT_QT          # usIXIC
+    internal_id: "US_NASDAQ_COMPOSITE"
+    priority: "P3"
   nasdaq100:
-    primary: FRED_NASDAQ100
-    series_id: "NASDAQ100"
+    primary: TENCENT_QT          # usNDX
+    internal_id: "US_NASDAQ100"
+    priority: "P3"
   gov_10y:
-    primary: US_TREASURY
-    fallback: FRED_DGS10
-    fail_policy: HARD_STOP
+    primary: EASTMONEY           # bond_zh_us_rate 美国10Y, 无用户token
+    internal_id: "US10Y"
+    priority: "P3"
+    fail_policy: HARD_STOP       # 美国10Y是收益率曲线监控关键指标
 
 # ============ 校验阈值（依据规范第25节） ============
 validation_thresholds:

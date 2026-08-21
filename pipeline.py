@@ -12,7 +12,7 @@ import argparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from collectors import chinabond_collector, csindex_collector
+from collectors import chinabond_collector, csindex_collector, us_market_collector
 from validator import validate
 from db import schema
 
@@ -46,6 +46,20 @@ def run(days: int = 7):
         except Exception as e:
             print(f"  ❌ 中证 {code} 采集失败: {e}")
 
+    # 1c. 美国模块（腾讯指数 + 东财美国10Y，P3 监控源）
+    try:
+        us_idx = us_market_collector.fetch_us_indices()
+        print(f"  美股指数(腾讯): {len(us_idx)} 条")
+        all_records.extend(us_idx)
+    except Exception as e:
+        print(f"  ❌ 美股指数采集失败: {e}")
+    try:
+        us_10y = us_market_collector.fetch_us_10y()
+        print(f"  美国10Y(东财): {len(us_10y)} 条")
+        all_records.extend(us_10y)
+    except Exception as e:
+        print(f"  ❌ 美国10Y采集失败: {e}")
+
     print(f"  采集总计: {len(all_records)} 条")
 
     # ========== 2. Validate ==========
@@ -68,12 +82,13 @@ def run(days: int = 7):
         schema.insert_or_replace(conn, rec)
     print(f"  入库: {len(result['passed'])} 条")
 
-    # 统计库里现有数据
+    # 统计库里现有数据（按 metric + symbol 分组，区分 CN10Y vs US10Y）
     cur = conn.execute(
-        "SELECT metric, COUNT(DISTINCT as_of_date) FROM market_data GROUP BY metric")
+        "SELECT metric, symbol, COUNT(DISTINCT as_of_date) FROM market_data "
+        "GROUP BY metric, symbol ORDER BY metric, symbol")
     print("\n  库内数据概览:")
-    for metric, cnt in cur.fetchall():
-        print(f"    {metric}: {cnt} 个交易日")
+    for metric, symbol, cnt in cur.fetchall():
+        print(f"    {metric} [{symbol}]: {cnt} 个交易日")
 
     conn.close()
 
@@ -81,9 +96,13 @@ def run(days: int = 7):
     print("\n[4] 最新关键指标:")
     conn2 = schema.init_db()
     for metric, symbol, name in [
-        ("yield_10y", "CN10Y", "10年期国债收益率"),
+        ("yield_10y", "CN10Y", "中国10年期国债收益率"),
         ("pe1_total_share", "000300", "沪深300 PE(总股本)"),
         ("pe1_total_share", "000922", "中证红利 PE(总股本)"),
+        ("yield_10y", "US10Y", "美国10年期国债收益率"),
+        ("close", "US_SP500", "标普500"),
+        ("close", "US_NASDAQ_COMPOSITE", "纳斯达克综合"),
+        ("close", "US_NASDAQ100", "纳斯达克100"),
     ]:
         cur = conn2.execute(
             "SELECT as_of_date, value, source_priority, validation_status "

@@ -11,11 +11,12 @@ VALIDATOR_VERSION = "1.0"
 
 # 各 metric 的合理范围（单位统一为 percentage_points 或 ratio）
 METRIC_RANGES = {
-    "yield_10y":          (0.0, 10.0),    # 10年期国债收益率 %
+    "yield_10y":          (0.0, 10.0),    # 10年期国债收益率 %（中美通用）
     "pe1_total_share":    (3.0, 200.0),   # 市盈率1（总股本）
     "pe2_calc_share":     (3.0, 200.0),   # 市盈率2（计算用股本）
     "dividend_yield1":    (0.0, 20.0),    # 股息率1 %
     "dividend_yield2":    (0.0, 20.0),    # 股息率2 %
+    "close":              (1.0, 200000.0),# 指数收盘价（美股指数可到数万点）
 }
 
 # 关键指标（失败必须 Fail Closed）
