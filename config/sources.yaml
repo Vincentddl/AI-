@@ -68,4 +68,17 @@ validation_thresholds:
 # ============ 单位规范 ============
 units:
   rate: "percentage_points"   # 1.69 表示 1.69%，不存 0.0169
-  erp_formula: "100.0 / pe - yield_10y"
+
+# ============ ERP 计算口径（已定死，不得更改） ============
+erp_calculation:
+  formula: "erp = 100 / pe - yield_10y"
+  pe_metric: "pe1_total_share"        # 用中证官方"市盈率1（总股本）"
+  pe_symbol: "000300"                  # 沪深300
+  pe_source: "CSINDEX_OFFICIAL"        # P0 官方源
+  yield_metric: "yield_10y"
+  yield_symbol: "CN10Y"
+  yield_source: "CHINABOND_OFFICIAL"   # P0 官方源
+  unit: "percentage_points"
+  # 口径说明：静态市盈率（LYR，最近年报净利润），已知有 1-2 季度滞后
+  # 未来接入 Tushare 后可用 pe_ttm 做交叉验证
+  pe_caliber: "static_lyr_total_share"
