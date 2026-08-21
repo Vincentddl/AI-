@@ -20,7 +20,7 @@ PROXY = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or "http:
 def send_markdown(content: str) -> dict:
     """Send markdown_v2 message to WeCom via proxy."""
     payload = json.dumps(
-        {"msgtype": "markdown_v2", "markdown_v2": {"content": content}},
+        {"msgtype": "markdown", "markdown": {"content": content}},
         ensure_ascii=False
     ).encode("utf-8")
 
