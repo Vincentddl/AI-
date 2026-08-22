@@ -10,7 +10,7 @@ import os
 import datetime
 import argparse
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from collectors import chinabond_collector, csindex_collector, us_market_collector
 from validator import validate

@@ -10,7 +10,7 @@ import sys
 import os
 import sqlite3
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from db.schema import DB_PATH
 
 # 5 档阈值（已定死，multiple = B 的倍数）
